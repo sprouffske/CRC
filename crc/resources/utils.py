@@ -1,6 +1,7 @@
 """SET OF GENERAL UTILITY FUNCTIONS FOR SEQ DATA."""
 
-# Functions require samtools to be callable with a 'samtools' command
+# Functions require samtools to be callable with a 'samtools' command and bamliquidator to be
+# callable with a 'bamliquidator' command
 
 import gzip
 import os
@@ -547,6 +548,31 @@ class Bam(object):
             seq_dict[read[9]] += 1
 
         return kept_reads
+
+    def liquidate_locus(self, locus, n=1, sense='.', extension=0, mmr=False):
+        """Use bamliquidator on a locus."""
+        bamliquidator_cmd = (
+            'bamliquidator {} {} {} {} {} {} {}'.format(
+                self._bam,
+                locus.chr,
+                str(locus.start),
+                str(locus.end),
+                sense,
+                n,
+                extension,
+            )
+        )
+        bamliquidator_out = subprocess.Popen(
+            bamliquidator_cmd,
+            stdout=subprocess.PIPE,
+            shell=True,
+        )
+        score = [int(x.rstrip()) for x in bamliquidator_out.stdout.readlines()]
+        if mmr:
+            mmr_count = float(self._mapped_reads) / 1000000
+            score = [round(x/mmr_count, 4) for x in score]
+
+        return score
 
 
 # ==================================================================
