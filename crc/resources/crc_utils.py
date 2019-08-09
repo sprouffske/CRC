@@ -829,7 +829,10 @@ def format_network_output(graph, output_folder, analysis_name):
 
     factor_ranking_table = []
     for factor in self_loops:
-        newline = [factor, factor_enrichment_dict[factor] / float(clique_len)]
+        if clique_len > 0:
+            newline = [factor, factor_enrichment_dict[factor] / float(clique_len)]
+        else:
+            newline = [0,0]
         factor_ranking_table.append(newline)
 
     factor_ranking_file = output_folder + analysis_name + '_ENRICHED_CLIQUE_FACTORS.txt'
